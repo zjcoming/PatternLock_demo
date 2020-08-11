@@ -43,6 +43,9 @@ class MainActivity : AppCompatActivity() {
         24,35,57,68,15,26,48,59//所有斜着的线
     )
 
+    //创建一个变量保存最后一个触摸到的视图
+    var lastSelectedView:ImageView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -91,19 +94,45 @@ class MainActivity : AppCompatActivity() {
     private fun highLight(event: MotionEvent){
         findViewContainsPoint(changeLocation(event)).also {
             if (it != null && it.visibility == View.INVISIBLE){
-                it.visibility = View.VISIBLE
-                allSelectedDots.add(it)
-                pwd.append(it.tag.toString())
+                //首先判断是否为第一个被点亮的点，如果是，则直接点亮这个点；如果不是则需要与上次被点亮的点之间的线条点亮
+                if(lastSelectedView == null){
+                    it.visibility = View.VISIBLE
+                    allSelectedDots.add(it)
+                    pwd.append(it.tag.toString())
+                    lastSelectedView = it
+                }else{
+                    val previews = lastSelectedView?.tag.toString().toInt()
+                    val current = it.tag.toString().toInt()
+                    //计算两点之间的tag值
+                    val lineTag = if (previews > current) current*10+previews else previews*10+current
+                    //判断有没有这两个点之间的线条，有就点亮
+                    if (allLinesTag.contains(lineTag)){
+                        mContainer.findViewWithTag<ImageView>(lineTag.toString()).apply {
+                            //点亮这条线
+                            visibility = View.VISIBLE
+                            //点亮这个点
+                            it.visibility = View.VISIBLE
+                            //把选中的这个点加到容器中方便删除
+                            allSelectedDots.add(it)
+                            //把选中的这条线加到容器中方便删除
+                            allSelectedDots.add(this)
+                            pwd.append(it.tag.toString())
+                            lastSelectedView = it
+                        }
+                    }
+                }
+
             }
         }
     }
-    //清空allSelectedDots 和熄灭图片 清除密码
+    //清空allSelectedDots 和熄灭图片 清除密码 清除上次使用时的最后一个视图记录
     private fun reset(){
         for(item in allSelectedDots){
             item.visibility = View.INVISIBLE
         }
         allSelectedDots.clear()
         pwd.clear()
+        lastSelectedView = null
     }
 }
 
