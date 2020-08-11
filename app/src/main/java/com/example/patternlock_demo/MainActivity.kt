@@ -10,6 +10,7 @@ import android.view.*
 import android.widget.ImageView
 import androidx.core.view.GravityCompat.apply
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     //使用懒加载创建数组保存点dot
@@ -32,6 +33,8 @@ class MainActivity : AppCompatActivity() {
 
     //创建一个数组保存已经点亮的点
     val allSelectedDots = mutableListOf<ImageView>()
+    //创建一个数组保存密码
+    private val pwd = StringBuilder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                 highLight(event)
             }
             MotionEvent.ACTION_UP -> {
+
                 reset()
             }
 
@@ -77,21 +81,23 @@ class MainActivity : AppCompatActivity() {
     }
     //获取视图对应的Rect（）
     private fun getRectForView(v:ImageView):Rect = Rect(v.left,v.top,v.right,v.bottom)
-    //点亮图片
+    //点亮图片和保存当前的密码值
     private fun highLight(event: MotionEvent){
         findViewContainsPoint(changeLocation(event)).also {
-            if (it != null){
+            if (it != null && it.visibility == View.INVISIBLE){
                 it.visibility = View.VISIBLE
                 allSelectedDots.add(it)
+                pwd.append(it.tag.toString())
             }
         }
     }
-    //清空allSelectedDots 和熄灭图片
+    //清空allSelectedDots 和熄灭图片 清除密码
     private fun reset(){
         for(item in allSelectedDots){
             item.visibility = View.INVISIBLE
         }
         allSelectedDots.clear()
+        pwd.clear()
     }
 }
 
