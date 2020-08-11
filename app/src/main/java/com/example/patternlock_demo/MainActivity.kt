@@ -33,10 +33,16 @@ class MainActivity : AppCompatActivity() {
     //创建一个数组保存已经点亮的点
     val allSelectedDots = mutableListOf<ImageView>()
 
+    //创建一个数组保存所有线的tag值
+    val allLinesTag = arrayOf(
+        12,23,45,56,78,89,//所有横着的线
+        14,25,36,47,58,69,//所有竖着的线
+        24,35,57,68,15,26,48,59//所有斜着的线
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
