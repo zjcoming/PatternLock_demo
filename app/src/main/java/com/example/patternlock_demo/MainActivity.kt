@@ -1,5 +1,6 @@
 package com.example.patternlock_demo
 
+import android.content.Intent
 import android.graphics.Point
 import android.graphics.Rect
 import androidx.appcompat.app.AppCompatActivity
@@ -33,8 +34,14 @@ class MainActivity : AppCompatActivity() {
 
     //创建一个数组保存已经点亮的点
     val allSelectedDots = mutableListOf<ImageView>()
-    //创建一个数组保存密码
+    //创建一个数组保存临时的密码
     private val pwd = StringBuilder()
+    //创建一个变量记录初始密码
+    private var orgPwd:String?  = null
+    //设置密码时的第一次密码保存
+    private var firstPwd:String? = null
+    //设置密码时的第2次密码保存
+    private val secondPwd:String? = null
 
     //创建一个数组保存所有线的tag值
     val allLinesTag = arrayOf(
@@ -49,6 +56,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        orgPwdIsNotExist()
+        onLock()
+
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -60,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                 highLight(event)
             }
             MotionEvent.ACTION_UP -> {
-
+                whetherToSetPwd()
                 reset()
             }
 
@@ -134,5 +144,48 @@ class MainActivity : AppCompatActivity() {
         pwd.clear()
         lastSelectedView = null
     }
+    //判断是否存在密码
+    fun orgPwdIsNotExist():Boolean{
+        //获取密码
+        SharedPreferenceUtil.getInstance(this).getPassword().also {
+            if (it == null){
+                textView2.text = "请设置密码："
+                return true
+            }else{
+                orgPwd = it
+                textView2.text = "请输入解锁密码图案"
+                return false
+            }
+        }
+    }
+    //判断是否需要设置密码
+    fun whetherToSetPwd(){
+        if (orgPwdIsNotExist()){
+            //是否为第一次设置密码
+            if (firstPwd == null){
+                firstPwd = pwd.toString()
+            }else{
+                //确认密码
+                if (firstPwd == pwd.toString()){
+                    textView2.text = "设置密码成功！"
+                    SharedPreferenceUtil.getInstance(this).savePassword(pwd.toString())
+
+                }else{
+                    textView2.text = "两次输入不一致，设置失败！"
+                    firstPwd =null
+                    whetherToSetPwd()
+                }
+            }
+        }
+    }
+    //解锁界面
+fun onLock(){
+    textView2.text = "请输入解锁密码图案"
+    if(pwd.toString() == SharedPreferenceUtil.getInstance(this).getPassword()){
+        startActivity(Intent(this,TurnActivity::class.java))
+    }else{
+        textView2.text = "密码错误"
+    }
+}
 }
 
